@@ -1,0 +1,62 @@
+# NBIS Early-Warning System
+
+import yfinance as yf
+
+# Get NBIS data
+nbis_data = yf.Ticker("NBIS").history(period="3mo")
+
+nbis_close = nbis_data["Close"]
+
+# Current NBIS price
+nbis_today = float(nbis_close.iloc[-1])
+
+print("================================")
+print("       NBIS EARLY-WARNING SYSTEM")
+print("================================")
+print()
+
+print(f"NBIS price: ${nbis_today:.2f}")
+
+# Calculate 50-day moving average
+nbis_50_day_average = nbis_close.rolling(50).mean().iloc[-1]
+
+print(f"NBIS 50-day average: ${nbis_50_day_average:.2f}")
+
+# Check whether NBIS is below its 50-day average
+nbis_below_trend = nbis_today < nbis_50_day_average
+
+print(f"NBIS below 50-day average: {nbis_below_trend}")
+print()
+# Calculate 20-day moving average
+nbis_20_day_average = nbis_close.rolling(20).mean().iloc[-1]
+
+print(f"NBIS 20-day average: ${nbis_20_day_average:.2f}")
+
+# Check short-term momentum
+nbis_below_momentum = nbis_today < nbis_20_day_average
+
+print(f"NBIS below 20-day average: {nbis_below_momentum}")
+# Risk score
+market_risk = 0
+
+# For now, use NBIS trend as our first warning signal
+if nbis_below_trend:
+    market_risk += 25
+
+if nbis_below_momentum:
+    market_risk += 25
+
+print(f"NBIS Risk Score: {market_risk}/100")
+
+# Determine status
+if market_risk == 0:
+    print("Status: NORMAL")
+
+elif market_risk <= 25:
+    print("Status: CAUTION")
+
+elif market_risk <= 50:
+    print("Status: HIGH RISK")
+
+else:
+    print("Status: SEVERE RISK")
